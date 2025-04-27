@@ -3,9 +3,12 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
+import os
 
 # Загрузка модели
-model = joblib.load(r'E:\Test_intern\best_model.pkl')
+BASE_DIR = os.path.dirname(__file__)            # путь к папке, где лежит app.py
+model_path = os.path.join(BASE_DIR, 'best_model.pkl')
+model = joblib.load(model_path)
 
 st.title("🎯 Прогноз сдачи экзамена")
 st.markdown("Загрузите CSV файл с вашими данными:")
