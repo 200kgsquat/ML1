@@ -1,18 +1,19 @@
 import streamlit as st
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
-import os
+from pathlib import Path
 
-# Определяем директорию приложения и загружаем модель
-BASE_DIR = os.path.dirname(__file__)
-model_path = os.path.join(BASE_DIR, 'best_model.pkl')
+# Определяем относительный путь к модели через pathlib
+script_path = Path(__file__).resolve()        # полный путь к текущему скрипту
+model_path = script_path.parent / 'best_model.pkl'  # путь к файлу модели
+
 # Проверяем существование файла модели
-if not os.path.exists(model_path):
-    st.error(f"Модель не найдена по пути: {model_path}")
+if not model_path.is_file():
+    st.error(f"❌ Файл модели не найден: {model_path}")
     st.stop()
 
+# Загружаем модель
 model = joblib.load(model_path)
 
 # Интерфейс Streamlit
@@ -20,7 +21,6 @@ st.title("🎯 Прогноз сдачи экзамена")
 st.markdown("Загрузите CSV файл с вашими данными:")
 
 # Функция препроцессинга
-
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     df_processed = df.copy()
 
