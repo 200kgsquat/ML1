@@ -5,11 +5,12 @@ import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 import os
 
-# Загрузка модели
-BASE_DIR = os.path.dirname(__file__)            # путь к папке, где лежит app.py
+# Определяем директорию приложения и загружаем модель
+BASE_DIR = os.path.dirname(__file__)
 model_path = os.path.join(BASE_DIR, 'best_model.pkl')
 model = joblib.load(model_path)
 
+# Интерфейс Streamlit
 st.title("🎯 Прогноз сдачи экзамена")
 st.markdown("Загрузите CSV файл с вашими данными:")
 
@@ -24,7 +25,6 @@ def preprocess_data(df):
     # OrdinalEncoder для категорий
     encoder = OrdinalEncoder()
     encoded_cols = ['Настроение', 'Посещаемость занятий', 'Время подготовки']
-
     df_processed[encoded_cols] = encoder.fit_transform(df_processed[encoded_cols])
 
     return df_processed
@@ -34,9 +34,7 @@ uploaded_file = st.file_uploader("Выберите CSV файл", type="csv")
 
 if uploaded_file is not None:
     try:
-        # Чтение файла
         data = pd.read_csv(uploaded_file)
-
         required_columns = [
             'Контрольная 1', 'Контрольная 2', 'Контрольная 3', 
             'Сон накануне', 'Настроение', 'Энергетиков накануне', 
@@ -45,40 +43,30 @@ if uploaded_file is not None:
 
         if all(col in data.columns for col in required_columns):
             st.success("Файл успешно загружен!")
-
-            # Показываем исходные данные
             st.subheader("📝 Ваши загруженные данные:")
             st.dataframe(data[required_columns])
 
-            # Препроцессинг данных
             X = preprocess_data(data[required_columns])
-
-            # Выбор строки
             selected_row = st.number_input(
                 "Выберите номер студента для прогноза (начинается с 0):", 
                 min_value=0, 
                 max_value=len(X) - 1, 
                 value=0
             )
+            row = X.iloc[[selected_row]]
 
-            row = X.iloc[[selected_row]]  # Двойные скобки чтобы получить DataFrame
-
-            # Предсказание
             prediction = model.predict(row)[0]
             probability = model.predict_proba(row)[0][1]
 
-            # Вывод красивого результата
-            st.subheader(" Результат прогноза:")
+            st.subheader("Результат прогноза:")
             if prediction == 1:
                 st.success(f"✅ Студент **СДАЛ** экзамен с вероятностью {probability:.2%}")
             else:
                 st.error(f"❌ Студент **НЕ СДАЛ** экзамен с вероятностью {1 - probability:.2%}")
-
         else:
             st.error(f"Ошибка: в файле должны быть колонки: {required_columns}")
 
     except Exception as e:
         st.error(f"Ошибка при обработке файла: {e}")
-
 else:
     st.info("Пожалуйста, загрузите CSV файл для прогноза.")
