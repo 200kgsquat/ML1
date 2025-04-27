@@ -69,9 +69,9 @@ if uploaded_file is not None:
             else:
                 st.error(f"❌ Студент {selected_row} **НЕ СДАЛ** экзамен с вероятностью {1 - prob_single:.2%}")
 
-            # 📊 Прогноз для сдавших студентов
-            st.subheader("📊 Прогноз для сдавших студентов")
-            if st.button("Показать только сдавших"):
+            # 📊 Прогноз для всех студентов
+            st.subheader("📊 Прогноз для всех студентов")
+            if st.button("Показать прогнозы для всех студентов"):
                 preds = model.predict(X)
                 probs = model.predict_proba(X)[:, 1]
                 results = pd.DataFrame({
@@ -82,17 +82,16 @@ if uploaded_file is not None:
                         for i in range(len(probs))
                     ]
                 })
-                # Фильтруем только сдавших и оставляем столбцы Студент и Вероятность
-                passed = results[results['Прогноз'] == 'СДАЛ'][['Студент', 'Вероятность']]
-                st.dataframe(passed, height=300)
+                st.dataframe(results, height=300)
 
-                csv = passed.to_csv(index=False).encode('utf-8')
+                csv = results.to_csv(index=False).encode('utf-8')
                 st.download_button(
-                    label="📥 Скачать результаты сдавших",
+                    label="📥 Скачать все результаты",
                     data=csv,
-                    file_name="passed_predictions.csv",
+                    file_name="all_predictions.csv",
                     mime="text/csv"
                 )
+
     except Exception as e:
         st.error(f"Ошибка при обработке файла: {e}")
 else:
