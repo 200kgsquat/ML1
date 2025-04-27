@@ -64,7 +64,8 @@ if uploaded_file is not None:
             # Препроцессинг данных
             X = preprocess_data(data[required_columns])
 
-            # Выбор строки для прогноза
+            # Прогноз для выбранного студента
+            st.subheader("🔍 Индивидуальный прогноз")
             selected_row = st.number_input(
                 "Выберите номер студента для прогноза (начинается с 0):",
                 min_value=0,
@@ -72,17 +73,22 @@ if uploaded_file is not None:
                 value=0
             )
             row = X.iloc[[selected_row]]
-
-            # Предсказание
-            prediction = model.predict(row)[0]
-            probability = model.predict_proba(row)[0][1]
-
-            # Вывод результата
-            st.subheader("Результат прогноза:")
-            if prediction == 1:
-                st.success(f"✅ Студент **СДАЛ** экзамен с вероятностью {probability:.2%}")
+            pred_single = model.predict(row)[0]
+            prob_single = model.predict_proba(row)[0][1]
+            if pred_single == 1:
+                st.success(f"✅ Студент **{selected_row}** **СДАЛ** экзамен с вероятностью {prob_single:.2%}")
             else:
-                st.error(f"❌ Студент **НЕ СДАЛ** экзамен с вероятностью {1 - probability:.2%}")
+                st.error(f"❌ Студент **{selected_row}** **НЕ СДАЛ** экзамен с вероятностью {1 - prob_single:.2%}")
+
+            # Прогноз для всех студентов
+            st.subheader("📊 Прогноз для всех студентов")
+            if st.button("Получить прогноз для всех студентов"):
+                preds = model.predict(X)
+                probs = model.predict_proba(X)[:, 1]
+                results = data.copy()
+                results['Прогноз'] = ['СДАЛ' if p == 1 else 'НЕ СДАЛ' for p in preds]
+                results['Вероятность'] = probs
+                st.dataframe(results)
 
     except Exception as e:
         st.error(f"Ошибка при обработке файла: {e}")
