@@ -59,7 +59,7 @@ if uploaded_file is not None:
             # 🔍 Индивидуальный прогноз
             st.subheader("🔍 Индивидуальный прогноз")
             selected_row = st.number_input(
-                "Выберите номер студента (от 0 до {len(X)-1}):", 0, len(X)-1, 0
+                f"Выберите номер студента (от 0 до {len(X)-1}):", 0, len(X)-1, 0
             )
             row = X.iloc[[selected_row]]
             pred_single = model.predict(row)[0]
@@ -74,10 +74,14 @@ if uploaded_file is not None:
             if st.button("Получить прогноз для всех студентов"):
                 preds = model.predict(X)
                 probs = model.predict_proba(X)[:, 1]
+                # Формируем таблицу с развёрнутыми процентами для тех, кто не сдал
                 results = pd.DataFrame({
                     'Студент': list(range(len(X))),
                     'Прогноз': ['СДАЛ' if p == 1 else 'НЕ СДАЛ' for p in preds],
-                    'Вероятность': [f"{p:.2%}" for p in probs]
+                    'Вероятность': [
+                        f"{probs[i]:.2%}" if preds[i] == 1 else f"{(1 - probs[i]):.2%}"
+                        for i in range(len(probs))
+                    ]
                 })
                 st.dataframe(results, height=300)
 
