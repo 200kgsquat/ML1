@@ -67,7 +67,7 @@ if uploaded_file is not None:
             if pred_single == 1:
                 st.success(f"✅ Студент {selected_row} **СДАЛ** экзамен с вероятностью {prob_single:.2%}")
             else:
-                st.error(f"❌ Студент {selected_row} **НЕ СДАЛ** экзамен с вероятностью {1 - prob_single:.2%}")
+                st.error(f"❌ Студент {selected_row} **СДАЛ** экзамен с вероятностью {1 - prob_single:.2%}")
 
             # 📊 Прогноз для всех студентов с вероятностями
             st.subheader("📊 Прогноз для всех студентов")
@@ -76,7 +76,7 @@ if uploaded_file is not None:
                 probs = model.predict_proba(X)[:, 1]
                 results = pd.DataFrame({
                     'Студент': list(range(len(X))),
-                    'Прогноз': ['СДАЛ' if p == 1 else 'НЕ СДАЛ' for p in preds],
+                    'Прогноз': ['СДАЛ' if p == 1 else 'СДАЛ' for p in preds],
                     'Вероятность сдачи': [f"{probs[i]:.2%}" for i in range(len(probs))]
                 })
 
