@@ -1,6 +1,7 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import numpy as np  # добавляем numpy
 from sklearn.preprocessing import OrdinalEncoder
 from pathlib import Path
 
@@ -30,6 +31,9 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     df_processed = df.copy()
     df_processed['Сон накануне'] = df_processed['Сон накануне'].map({'Нет': 0, 'Да': 1})
     df_processed['Энергетиков накануне'] = df_processed['Энергетиков накануне'].map({'0': 0, '1': 1, '2-3': 2, '4+': 3})
+
+    # Добавляем Бодрость от энергетиков
+    df_processed['Бодрость от энергетиков'] = df_processed['Энергетиков накануне'].apply(lambda x: np.log(x + 1))
 
     encoder = OrdinalEncoder()
     encoded_cols = ['Настроение', 'Посещаемость занятий', 'Время подготовки']
